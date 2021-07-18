@@ -34,7 +34,6 @@ class Repository {
   List<WordEntity> get shuffledWordList => _shuffledWordList;
 
   void generateWordList() {
-    print('----');
     _wordList.clear();
     _shuffledWordList.clear();
 
