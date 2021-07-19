@@ -59,7 +59,7 @@ class Repository {
   }
 
   void shiftWordListDown() {
-    _selectedId = null;
+    // _selectedId = null;
 
     _tempWordList.addAll(_shuffledWordList);
 
@@ -79,7 +79,7 @@ class Repository {
   }
 
   void shiftWordListUp() {
-    _selectedId = null;
+    // _selectedId = null;
 
     _tempWordList.addAll(_shuffledWordList);
 
