@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:word_selector/ui/common/bloc_builder.dart';
 import 'package:word_selector/ui/common/bloc_provider.dart';
+import 'package:word_selector/ui/common/constants.dart';
 import 'package:word_selector/ui/word_list/presenter/word_list_presenter.dart';
 import 'package:word_selector/ui/word_list/presenter/word_list_presenter_output.dart';
 import 'package:word_selector/ui/word_list/presenter/word_list_view_model.dart';
@@ -33,18 +34,26 @@ class WordListScene extends StatelessWidget {
             appBar: AppBar(
               title: Text('Word List (${viewModel.rows.length})'),
             ),
-            body: ListView(
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ListView.builder(
-                    shrinkWrap: true,
-                    padding: EdgeInsets.all(16.0),
-                    itemCount: viewModel.rows.length,
-                    itemBuilder: (_, index) {
-                      return _WordRow(
-                        viewModelRow: viewModel.rows[index],
-                        index: index,
-                      );
-                    }),
+                Container(
+                  height: 400,
+                  child: ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      padding: EdgeInsets.all(16.0),
+                      itemCount: viewModel.rows.length,
+                      itemBuilder: (_, index) {
+                        return Container(
+                          height: 400 / VISIBLE_WORDS_COUNT - 10,
+                          child: _WordRow(
+                            viewModelRow: viewModel.rows[index],
+                            index: index,
+                          ),
+                        );
+                      }),
+                ),
                 _ActionSet(viewState),
               ],
             ),
@@ -67,33 +76,30 @@ class _WordRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<WordListPresenter>(context);
 
-    return Column(
-      children: [
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 10.0),
-          decoration: BoxDecoration(
-            border: Border.all(
-                color: viewModelRow.isWordSelected
-                    ? Colors.blueGrey[900]
-                    : Colors.black),
-            color:
-                viewModelRow.isWordSelected ? Colors.blue[900] : Colors.white,
-            borderRadius: BorderRadius.circular(10.0),
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.0),
+      decoration: BoxDecoration(
+        border: Border.all(
+            color: viewModelRow.isWordSelected
+                ? Colors.blueGrey[900]
+                : Colors.black),
+        color: viewModelRow.isWordSelected ? Colors.blue[900] : Colors.white,
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: GestureDetector(
+          child: Center(
+            child: Text(
+              viewModelRow.wordName,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: viewModelRow.isWordSelected
+                      ? Colors.white
+                      : Colors.blue[900]),
+            ),
           ),
-          child: ListTile(
-              title: Text(
-                viewModelRow.wordName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: viewModelRow.isWordSelected
-                        ? Colors.white
-                        : Colors.blue[900]),
-              ),
-              onTap: () {
-                bloc.setSelection(index);
-              }),
-        )
-      ],
+          onTap: () {
+            bloc.setSelection(index);
+          }),
     );
   }
 }
@@ -106,6 +112,7 @@ class _ActionSet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<WordListPresenter>(context);
+
     return Column(
       children: [
         Row(
@@ -113,26 +120,22 @@ class _ActionSet extends StatelessWidget {
           children: [
             _ActionButton(
               '^\n|',
-              viewState.initialState ? null : bloc.up,
+              viewState.upEnabled ? bloc.up : null,
             ),
             _ActionButton(
               '|\nV',
-              !viewState.initialState || !viewState.getMoreEnabled
-                  ? bloc.down
-                  : null,
+              viewState.downEnabled ? bloc.down : null,
             ),
             _ActionButton(
               'Get\nMore',
-              viewState.initialState && viewState.getMoreEnabled
-                  ? bloc.getMore
-                  : null,
+              viewState.getMoreEnabled ? bloc.getMore : null,
             ),
           ],
         ),
         const SizedBox(height: 20),
         _ActionButton(
           'ShowSelection',
-          viewState.showSelection
+          viewState.showSelectionEnabled
               ? () {
                   WidgetsBinding.instance.addPostFrameCallback(
                     (_) => showDialog(
@@ -140,7 +143,7 @@ class _ActionSet extends StatelessWidget {
                       builder: (BuildContext context) => AlertDialog(
                         title: const Text('Hi'),
                         content: Text(
-                            'Your selected word is ${bloc.getSelectedWord()}'),
+                            'Your selected word is ${viewState.selectedWord}'),
                         actions: <Widget>[
                           TextButton(
                             onPressed: () => Navigator.pop(context, 'OK'),

@@ -18,7 +18,7 @@ class WordListUseCase with StarterBloc<WordListUseCaseOutput> {
   }
 
   void _refreshDisplay() {
-    final presentModelRowList = _repository.shuffledWordList
+    final presentModelRowList = _repository.visibleWordList
         .map(
           (word) => PresenterRowModel(
             id: word.id,
@@ -31,9 +31,11 @@ class WordListUseCase with StarterBloc<WordListUseCaseOutput> {
       PresentModel(
         PresenterModel(presentModelRowList),
         PresenterState(
-          _repository.isInitialState,
+          _repository.isUpEnabled,
+          _repository.isDownEnabled,
           _repository.isGetMoreEnabled,
           _repository.isShowSelectionEnabled,
+          _repository.selectedWord,
         ),
       ),
     );
@@ -50,8 +52,9 @@ class WordListUseCase with StarterBloc<WordListUseCaseOutput> {
   }
 
   void getMore() {
-    _repository.toggleGetMore();
+    _repository.setGetMoreButtonTapped();
     _refreshDisplay();
+    _repository.resetGetMoreButtonTapped();
   }
 
   void setSelection(int id) {

@@ -1,12 +1,16 @@
 import 'package:word_selector/ui/word_list/usecase/word_list_presenter_state.dart';
 
 class ViewState {
-  final bool initialState;
+  final bool upEnabled;
+  final bool downEnabled;
   final bool getMoreEnabled;
-  final bool showSelection;
+  final bool showSelectionEnabled;
+  final String selectedWord;
 
   ViewState.fromPresentation(PresenterState state)
-      : initialState = state.initialState,
+      : upEnabled = state.upEnabled,
+        downEnabled = state.downEnabled,
         getMoreEnabled = state.getMoreEnabled,
-        showSelection = state.showSelection;
+        showSelectionEnabled = state.showSelectionEnabled,
+        selectedWord = state.selectedWord;
 }

@@ -49,8 +49,5 @@ class WordListPresenter with StarterBloc<WordListPresenterOutput> {
     _useCase.setSelection(id);
   }
 
-  String getSelectedWord() {
-    PresenterRowModel selectedRow = _cachedPresenterModel.rows.firstWhere((element) => element.isWordSelected);
-    return selectedRow.wordName;
-  }
+  
 }

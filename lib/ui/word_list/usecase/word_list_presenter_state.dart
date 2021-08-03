@@ -1,11 +1,15 @@
 class PresenterState {
-  final bool initialState;
+  final bool upEnabled;
+  final bool downEnabled;
   final bool getMoreEnabled;
-  final bool showSelection;
+  final bool showSelectionEnabled;
+  final String selectedWord;
 
   PresenterState(
-   this.initialState,
+    this.upEnabled,
+    this.downEnabled,
     this.getMoreEnabled,
-    this.showSelection,
+    this.showSelectionEnabled,
+    this.selectedWord,
   );
 }

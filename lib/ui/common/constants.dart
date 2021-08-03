@@ -1,0 +1,1 @@
+const VISIBLE_WORDS_COUNT = 5;
