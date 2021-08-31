@@ -1,11 +1,17 @@
 import 'package:word_selector/repo/factory/repository.dart';
 import 'package:word_selector/ui/common/starter_bloc.dart';
 import 'package:word_selector/ui/word_list/usecase/word_list_presenter_model.dart';
-import 'package:word_selector/ui/word_list/usecase/word_list_presenter_state.dart';
 import 'package:word_selector/ui/word_list/usecase/word_list_use_case_output.dart';
 
 class WordListUseCase with StarterBloc<WordListUseCaseOutput> {
   Repository _repository;
+
+  List<WordEntity> _cachedWordList;
+
+  int _startIndex = 0;
+
+  int _selectedId;
+  String _selectedWord;
 
   WordListUseCase(this._repository) {
     streamAdd(PresentLoading());
@@ -14,51 +20,52 @@ class WordListUseCase with StarterBloc<WordListUseCaseOutput> {
 
   void eventGenerateWordList() {
     _repository.generateWordList();
+    _cachedWordList = _repository.wordList;
     _refreshDisplay();
   }
 
   void _refreshDisplay() {
-    final presentModelRowList = _repository.visibleWordList
+    final presentModelRowList = _cachedWordList
+        .sublist(_startIndex, _startIndex + 5)
         .map(
           (word) => PresenterRowModel(
             id: word.id,
             wordName: word.wordName,
-            isWordSelected: _repository.isWordSelected(word.id),
+            selected: _selectedId != null && _selectedId == word.id,
           ),
         )
         .toList();
+
     streamAdd(
       PresentModel(
-        PresenterModel(presentModelRowList),
-        PresenterState(
-          _repository.isUpEnabled,
-          _repository.isDownEnabled,
-          _repository.isGetMoreEnabled,
-          _repository.isShowSelectionEnabled,
-          _repository.selectedWord,
+        PresenterModel(
+          presentModelRowList,
+          _cachedWordList.first.id,
+          _cachedWordList.last.id,
+          _selectedWord,
         ),
       ),
     );
   }
 
-  void up() {
-    _repository.shiftWordListDown();
+  void moveListUp() {
+    _startIndex += 1;
     _refreshDisplay();
   }
 
-  void down() {
-    _repository.shiftWordListUp();
+  void moveListDown() {
+    _startIndex -= 1;
     _refreshDisplay();
   }
 
-  void getMore() {
-    _repository.setGetMoreButtonTapped();
-    _refreshDisplay();
-    _repository.resetGetMoreButtonTapped();
+  void getMoreWords() {
+    eventGenerateWordList();
   }
 
-  void setSelection(int id) {
-    _repository.setSelectedWord(id);
+  void setSelectedWord(int id) {
+    _selectedId = id;
+    _selectedWord =
+        _cachedWordList.firstWhere((word) => word.id == id).wordName;
     _refreshDisplay();
   }
 }

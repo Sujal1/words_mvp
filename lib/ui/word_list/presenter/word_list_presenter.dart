@@ -1,7 +1,6 @@
 import 'package:word_selector/ui/common/starter_bloc.dart';
 import 'package:word_selector/ui/word_list/presenter/word_list_presenter_output.dart';
 import 'package:word_selector/ui/word_list/presenter/word_list_view_model.dart';
-import 'package:word_selector/ui/word_list/presenter/word_list_view_state.dart';
 import 'package:word_selector/ui/word_list/router/word_list_router.dart';
 import 'package:word_selector/ui/word_list/usecase/word_list_presenter_model.dart';
 import 'package:word_selector/ui/word_list/usecase/word_list_use_case.dart';
@@ -13,6 +12,19 @@ class WordListPresenter with StarterBloc<WordListPresenterOutput> {
 
   PresenterModel _cachedPresenterModel;
 
+  bool get down =>
+      _cachedPresenterModel.rows.last.id != _cachedPresenterModel.lastId;
+
+  bool get up =>
+      _cachedPresenterModel.rows.first.id != _cachedPresenterModel.firstId;
+
+  bool get getMore =>
+      _cachedPresenterModel.rows.last.id == _cachedPresenterModel.lastId;
+
+  bool get showSelection => _cachedPresenterModel.selectedWord != null;
+
+  String get selectedWord => _cachedPresenterModel.selectedWord;
+  
   WordListPresenter(this._useCase, this._router) {
     _useCase.stream.listen((event) {
       if (event is PresentLoading) {
@@ -22,7 +34,6 @@ class WordListPresenter with StarterBloc<WordListPresenterOutput> {
         streamAdd(
           ShowModel(
             ViewModel.fromPresentation(event.model),
-            ViewState.fromPresentation(event.state),
           ),
         );
       } else {
@@ -32,22 +43,19 @@ class WordListPresenter with StarterBloc<WordListPresenterOutput> {
     });
   }
 
-  void up() {
-    _useCase.up();
+  void moveListUp() {
+    _useCase.moveListUp();
   }
 
-  void down() {
-    _useCase.down();
+  void moveListDown() {
+    _useCase.moveListDown();
   }
 
-  void getMore() {
-    _useCase.getMore();
+  void getMoreWords() {
+    _useCase.getMoreWords();
   }
 
-  void setSelection(int index) {
-    final id = _cachedPresenterModel.rows[index].id;
-    _useCase.setSelection(id);
+  void setSelectedWord(int index) {
+    _useCase.setSelectedWord(_cachedPresenterModel.rows[index].id);
   }
-
-  
 }

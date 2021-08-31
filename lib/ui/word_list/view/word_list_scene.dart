@@ -5,7 +5,6 @@ import 'package:word_selector/ui/common/constants.dart';
 import 'package:word_selector/ui/word_list/presenter/word_list_presenter.dart';
 import 'package:word_selector/ui/word_list/presenter/word_list_presenter_output.dart';
 import 'package:word_selector/ui/word_list/presenter/word_list_view_model.dart';
-import 'package:word_selector/ui/word_list/presenter/word_list_view_state.dart';
 
 class WordListScene extends StatelessWidget {
   final WordListPresenter _presenter;
@@ -29,7 +28,6 @@ class WordListScene extends StatelessWidget {
           );
         } else if (data is ShowModel) {
           final viewModel = data.model;
-          final viewState = data.state;
           return Scaffold(
             appBar: AppBar(
               title: Text('Word List (${viewModel.rows.length})'),
@@ -54,7 +52,7 @@ class WordListScene extends StatelessWidget {
                         );
                       }),
                 ),
-                _ActionSet(viewState),
+                _ActionSet(),
               ],
             ),
           );
@@ -76,17 +74,18 @@ class _WordRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<WordListPresenter>(context);
 
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10.0),
-      decoration: BoxDecoration(
-        border: Border.all(
-            color: viewModelRow.isWordSelected
-                ? Colors.blueGrey[900]
-                : Colors.black),
-        color: viewModelRow.isWordSelected ? Colors.blue[900] : Colors.white,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: GestureDetector(
+    return GestureDetector(
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 10.0),
+          decoration: BoxDecoration(
+            border: Border.all(
+                color: viewModelRow.isWordSelected
+                    ? Colors.blueGrey[900]
+                    : Colors.black),
+            color:
+                viewModelRow.isWordSelected ? Colors.blue[900] : Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
           child: Center(
             child: Text(
               viewModelRow.wordName,
@@ -97,66 +96,65 @@ class _WordRow extends StatelessWidget {
                       : Colors.blue[900]),
             ),
           ),
-          onTap: () {
-            bloc.setSelection(index);
-          }),
-    );
+        ),
+        onTap: () {
+          bloc.setSelectedWord(index);
+        });
   }
 }
 
 class _ActionSet extends StatelessWidget {
-  final ViewState viewState;
-
-  _ActionSet(this.viewState);
-
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<WordListPresenter>(context);
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _ActionButton(
-              '^\n|',
-              viewState.upEnabled ? bloc.up : null,
-            ),
-            _ActionButton(
-              '|\nV',
-              viewState.downEnabled ? bloc.down : null,
-            ),
-            _ActionButton(
-              'Get\nMore',
-              viewState.getMoreEnabled ? bloc.getMore : null,
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        _ActionButton(
-          'ShowSelection',
-          viewState.showSelectionEnabled
-              ? () {
-                  WidgetsBinding.instance.addPostFrameCallback(
-                    (_) => showDialog(
-                      context: context,
-                      builder: (BuildContext context) => AlertDialog(
-                        title: const Text('Hi'),
-                        content: Text(
-                            'Your selected word is ${viewState.selectedWord}'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, 'OK'),
-                            child: const Text('OK'),
-                          ),
-                        ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _ActionButton(
+                '^\n|',
+                bloc.up ? bloc.moveListDown : null,
+              ),
+              _ActionButton(
+                '|\nV',
+                bloc.down ? bloc.moveListUp : null,
+              ),
+              _ActionButton(
+                'Get\nMore',
+                bloc.getMore ? bloc.getMoreWords : null,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _ActionButton(
+            'ShowSelection',
+            bloc.showSelection
+                ? () {
+                    WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => showDialog(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: const Text('Hi'),
+                          content:
+                              Text('Your selected word is ${bloc.selectedWord}'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }
-              : null,
-        ),
-      ],
+                    );
+                  }
+                : null,
+          ),
+        ],
+      ),
     );
   }
 }

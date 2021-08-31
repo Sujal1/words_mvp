@@ -6,7 +6,7 @@ class ViewRowModel {
 
   ViewRowModel.fromPresentation(PresenterRowModel row)
       : wordName = row.wordName,
-        isWordSelected = row.isWordSelected;
+        isWordSelected = row.selected;
 }
 
 class ViewModel {
